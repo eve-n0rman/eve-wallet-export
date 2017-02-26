@@ -1,0 +1,1 @@
+web: gunicorn eve_wallet_export:app
