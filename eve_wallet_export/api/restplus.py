@@ -9,6 +9,7 @@ log = logging.getLogger(__name__)
 api = Api(version='0.1', title='Eve Wallet Export API',
           description='RESTful EVE wallet exporter')
 
+print "API Blueprint running"
 
 @api.errorhandler
 def default_error_handler(e):
