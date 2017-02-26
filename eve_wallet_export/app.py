@@ -25,6 +25,7 @@ def initialize_app(flask_app):
     api.init_app(blueprint)
     api.add_namespace(wallet_journal_namespace)
     flask_app.register_blueprint(blueprint)
+    print "App running"
 
 
 def main():
