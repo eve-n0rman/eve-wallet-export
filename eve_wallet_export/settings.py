@@ -1,5 +1,5 @@
 # Flask settings
-FLASK_SERVER_NAME = 'evewalletexport.herokuapp.com:443'
+FLASK_SERVER_NAME = 'eve-wallet-export.herokuapp.com:443'
 FLASK_DEBUG = False  # Do not use debug mode in production
 
 # Flask-Restplus settings
