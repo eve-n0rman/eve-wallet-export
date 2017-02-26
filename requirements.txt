@@ -14,6 +14,7 @@ fido==4.1.0
 Flask==0.12
 flask-restplus==0.10.0
 functools32==3.2.3.post2
+gunicorn==19.6.0
 idna==2.2
 incremental==16.10.1
 ipaddress==1.0.18
@@ -21,7 +22,9 @@ itsdangerous==0.24
 Jinja2==2.9.5
 jsonschema==2.6.0
 MarkupSafe==0.23
+numpy==1.12.0
 packaging==16.8
+pandas==0.19.2
 pyasn1==0.2.2
 pyasn1-modules==0.0.8
 pycparser==2.17
