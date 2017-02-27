@@ -28,6 +28,7 @@ def wallet_to_dataframe(key, code, char_corp, division=1000, wallet_type="Journa
     from_field = "refID" if wallet_type == "Journal" else "transactionID"
     while (num_entries > 0):
         wallet_xml = xml_client.get(endpoint, params=request_params)
+        wallet_xml.raise_for_status()
         wallet_root = et.fromstring(wallet_xml.content)
         request_df = pd.DataFrame(list(iter_row(wallet_root)))
         num_entries = request_df.shape[0]
