@@ -22,21 +22,22 @@ def ref_type_resolution():
     return ref_types
 
 
-def journal_to_dataframe(key, code, type, division=1000):
-    endpoint = "https://api.eveonline.com/{}/WalletJournal.xml.aspx".format(type)
-    from_id = None
+def wallet_to_dataframe(key, code, char_corp, division=1000, wallet_type="Journal"):
+    endpoint = "https://api.eveonline.com/{}/Wallet{}.xml.aspx".format(char_corp, wallet_type)
     request_params = {"keyID": key, "vCode": code, "accountKey": division, "rowCount": 2650}
     wallet_df = pd.DataFrame()
     num_entries = 1
+    from_field = "refID" if wallet_type == "Journal" else "transactionID"
     while (num_entries > 0):
-        wallet_xml = xml_client.get("https://api.eveonline.com/char/WalletJournal.xml.aspx", params=request_params)
+        wallet_xml = xml_client.get(endpoint, params=request_params)
         wallet_root = et.fromstring(wallet_xml.content)
         request_df = pd.DataFrame(list(iter_row(wallet_root)))
         num_entries = request_df.shape[0]
         if num_entries > 0:
             wallet_df = wallet_df.append(request_df)
-            request_params["fromID"] = request_df["refID"].min()
+            request_params["fromID"] = request_df[from_field].min()
     wallet_df = wallet_df.apply(lambda x: pd.to_numeric(x, errors='ignore'))
-    wallet_df["refTypeName"] = wallet_df["refTypeID"].map(ref_type_resolution())
-    wallet_df.set_index("refID", inplace=True)
+    if wallet_type == "Journal":
+        wallet_df["refTypeName"] = wallet_df["refTypeID"].map(ref_type_resolution())
+    wallet_df.set_index(from_field, inplace=True)
     return wallet_df

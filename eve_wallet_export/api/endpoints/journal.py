@@ -2,7 +2,7 @@ import logging
 
 from flask import request, make_response
 from flask_restplus import Resource, fields
-from eve_wallet_export.api.business import journal_to_dataframe
+from eve_wallet_export.api.business import wallet_to_dataframe
 from eve_wallet_export.api.parsers import journal_arguments
 from eve_wallet_export.api.restplus import api
 
@@ -52,7 +52,7 @@ class WalletJournal(Resource):
         wtype = args.get('type')
         division = args.get('division')
         output = args.get('output')
-        wallet = journal_to_dataframe(key, code, wtype, division)
+        wallet = wallet_to_dataframe(key, code, wtype, division)
         if output == 'csv':
             response = make_response(wallet.to_csv())
             cd = 'attachment; filename=wallet-journal.csv'
