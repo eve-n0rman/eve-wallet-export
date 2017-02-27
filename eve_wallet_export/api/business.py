@@ -14,11 +14,9 @@ def iter_row(root):
 def ref_type_resolution():
     ref_type_xml = xml_client.get("https://api.eveonline.com/eve/RefTypes.xml.aspx")
     ref_type_root = et.fromstring(ref_type_xml.content)
-    print ref_type_xml.content
     ref_types = {}
     for ref_type in iter_row(ref_type_root):
         ref_types[int(ref_type['refTypeID'])] = ref_type['refTypeName']
-    print ref_types
     return ref_types
 
 

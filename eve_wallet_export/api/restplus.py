@@ -16,4 +16,6 @@ def default_error_handler(e):
 
     if not settings.FLASK_DEBUG:
         return {'message': message}, 500
+    else:
+        raise e
 
