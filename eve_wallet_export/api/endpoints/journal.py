@@ -1,9 +1,8 @@
 import logging
 
-from flask import request, make_response
 from flask_restplus import Resource, fields
-from eve_wallet_export.api.business import wallet_to_dataframe
-from eve_wallet_export.api.parsers import journal_arguments
+from eve_wallet_export.api.business import wallet_to_dataframe, wallet_getter
+from eve_wallet_export.api.parsers import wallet_arguments
 from eve_wallet_export.api.restplus import api
 
 log = logging.getLogger(__name__)
@@ -38,28 +37,8 @@ journal_list = api.model('Wallet journal entries', {
 
 @ns.route('/')
 class WalletJournal(Resource):
-
-    @api.expect(journal_arguments)
+    @api.expect(wallet_arguments)
     @api.response(200, 'Success - Returns CSV or JSON', journal_list)
     @api.response(400, 'Validation Error')
     def get(self):
-        """
-        Returns the wallet journal
-        """
-        args = journal_arguments.parse_args(request)
-        key = args.get('key')
-        code = args.get('code')
-        wtype = args.get('type')
-        division = args.get('division')
-        output = args.get('output')
-        wallet = wallet_to_dataframe(key, code, wtype, division)
-        if output == 'csv':
-            response = make_response(wallet.to_csv())
-            cd = 'attachment; filename=wallet-journal.csv'
-            response.headers['Content-Disposition'] = cd
-            response.mimetype='text/csv'
-            return response
-        elif output == 'json':
-            response = make_response(wallet.to_json(orient="index"))
-            response.mimetype='application/json'
-            return response
+        return wallet_getter(self, "Journal")
