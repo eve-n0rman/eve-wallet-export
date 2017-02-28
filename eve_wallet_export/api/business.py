@@ -55,7 +55,7 @@ def wallet_getter(self, wallet_type):
     output = args.get('output')
     wallet = wallet_to_dataframe(key, code, wtype, wallet_type, division)
     if output == 'csv':
-        response = make_response(wallet.to_csv())
+        response = make_response(wallet.to_csv(encoding='utf-8'))
         cd = 'attachment; filename=wallet-{}.csv'.format(wallet_type.lower())
         response.headers['Content-Disposition'] = cd
         response.mimetype='text/csv'
