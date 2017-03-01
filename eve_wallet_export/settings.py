@@ -1,5 +1,4 @@
 # Flask settings
-SERVER_NAME = 'eve-wallet-export.herokuapp.com'
 DEBUG = False  # Do not use debug mode in production
 
 # Flask-Restplus settings
