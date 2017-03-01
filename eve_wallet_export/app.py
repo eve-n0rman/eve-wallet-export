@@ -1,4 +1,5 @@
 import logging.config
+import os
 
 from flask import Flask, Blueprint
 from eve_wallet_export import settings
@@ -13,7 +14,8 @@ log = logging.getLogger(__name__)
 
 def configure_app(flask_app):
     flask_app.config.from_object('eve_wallet_export.settings')
-    flask_app.config.from_envvar('EVE_WALLET_EXPORT_DEV_SETTINGS')
+    if 'EVE_WALLET_EXPORT_DEV_SETTINGS' in os.environ:
+        flask_app.config.from_envvar('EVE_WALLET_EXPORT_DEV_SETTINGS')
 
 
 def initialize_app(flask_app):
