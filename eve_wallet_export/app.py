@@ -2,10 +2,8 @@ import logging.config
 import os
 
 from flask import Flask, Blueprint
-from eve_wallet_export import settings
-from eve_wallet_export.api.endpoints.journal import ns as wallet_journal_namespace
-from eve_wallet_export.api.endpoints.transactions import ns as wallet_transactions_namespace
 from eve_wallet_export.api.restplus import api
+from eve_wallet_export.api.endpoints.wallets import ns as wallet_namespace
 
 app = Flask(__name__)
 logging.config.fileConfig('logging.conf')
@@ -23,14 +21,11 @@ def initialize_app(flask_app):
 
     blueprint = Blueprint('api', __name__, url_prefix='/api')
     api.init_app(blueprint)
-    api.add_namespace(wallet_journal_namespace)
-    api.add_namespace(wallet_transactions_namespace)
     flask_app.register_blueprint(blueprint)
 
 
 def main():
     initialize_app(app)
-    #log.info('>>>>> Starting development server at http://{}/api/ <<<<<'.format(app.config['SERVER_NAME']))
     app.run()
 
 if __name__ == "__main__":
