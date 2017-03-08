@@ -1,9 +1,6 @@
 import logging
-import traceback
-
 from flask_restplus import Api
-from eve_wallet_export import settings
-from requests import HTTPError
+from requests import HTTPError, ConnectionError
 
 log = logging.getLogger(__name__)
 
@@ -16,6 +13,11 @@ def requests_http_error_handler(e):
     log.exception(e)
     return {'message': str(e)}, status_code
 
+@api.errorhandler(ConnectionError)
+def requests_http_connection_error_handler(e):
+    status_code = e.response.status_code
+    log.exception(e)
+    return {'message': str(e)}, status_code
 
 @api.errorhandler
 def default_error_handler(e):
