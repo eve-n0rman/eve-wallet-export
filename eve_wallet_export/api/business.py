@@ -94,9 +94,9 @@ def get_accessmasks():
     accessmasks_root = xml_api("/api/CallList.xml.aspx")
     accessmasks = {'Corporation': {},
                    'Character': {}}
-    for accessmask in accessmasks_root.findall('.//rowset[@name="calls"]/row'):
-        accessdict = accessmask.attrib
-        accessmasks[accessdict['type']][accessdict['name']] = int(accessdict['accessMask'])
+    rowset = accessmasks_root.find('.//rowset[@name="calls"]')
+    for accessmask in iter_row(rowset):
+        accessmasks[accessmask['type']][accessmask['name']] = int(accessmask['accessMask'])
     log.debug(accessmasks)
     return accessmasks
 
@@ -127,8 +127,7 @@ def check_key(key, code):
             if accessmask & accessmasks['Character'][mask] == 0:
                 log.warn("Missing char permission: {}".format(mask))
                 return False
-    for character_xml in keyinfo_root.findall('.//row'):
-        character = character_xml.attrib
+    for character in iter_row(keyinfo_root):
         entities['entities'].append(character)
     return entities
 
@@ -137,8 +136,9 @@ def fetch_wallet_balances(key, code, char_corp, character_id):
     endpoint = "/{}/AccountBalance.xml.aspx".format(char_corp)
     balance_root = xml_api(endpoint, params={'keyID': key, 'vCode': code, 'characterID': character_id})
     balances = {}
-    for division in balance_root.findall('.//rowset[@name="accounts"]/row'):
-        balances[int(division.get('accountKey'))] = float(division.get('balance'))
+    rowset = balance_root.find('.//rowset[@name="accounts"]')
+    for division in iter_row(rowset):
+        balances[int(division['accountKey'])] = float(division['balance'])
     log.debug(balances)
     return balances
 
@@ -146,12 +146,13 @@ def fetch_wallet_balances(key, code, char_corp, character_id):
 def fetch_corp_wallet_divisions(key, code):
     corp_sheet_root = xml_api('/corp/CorporationSheet.xml.aspx', params={'keyID': key, 'vCode': code})
     divisions = {}
-    for division in corp_sheet_root.findall('.//rowset[@name="walletDivisions"]/row'):
-        division_id = int(division.get('accountKey'))
+    rowset = corp_sheet_root.find('.//rowset[@name="walletDivisions"]')
+    for division in iter_row(rowset):
+        division_id = int(division['accountKey'])
         # BUGFIX: some DUST 514 nonsense that's undocumented in the API
         if division_id == 10000:
             continue
-        divisions[division_id] = division.get('description')
+        divisions[division_id] = division['description']
     log.debug(divisions)
     return divisions
 
