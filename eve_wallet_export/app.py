@@ -4,6 +4,8 @@ import os
 from flask import Flask, Blueprint
 from eve_wallet_export.api.restplus import api
 from eve_wallet_export.api.endpoints.wallets import ns as wallet_namespace
+from eve_wallet_export.frontend import frontend
+
 
 app = Flask(__name__)
 logging.config.fileConfig('logging.conf')
@@ -22,7 +24,7 @@ def initialize_app(flask_app):
     blueprint = Blueprint('api', __name__, url_prefix='/api')
     api.init_app(blueprint)
     flask_app.register_blueprint(blueprint)
-
+    flask_app.register_blueprint(frontend, url_prefix='/')
 
 def main():
     initialize_app(app)
