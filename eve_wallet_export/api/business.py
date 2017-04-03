@@ -77,7 +77,7 @@ def wallet_entry_getter(self, wallet_type):
     wallet = wallet_to_dataframe(key, code, wtype, wallet_type, division=division, character_id=character_id)
     if output == 'csv':
         response = make_response(wallet.to_csv(encoding='utf-8'))
-        cd = 'attachment; filename=wallet-{}.csv'.format(wallet_type.lower())
+        cd = 'attachment'
         response.headers['Content-Disposition'] = cd
         response.mimetype='text/csv'
         return response
@@ -194,7 +194,7 @@ def fetch_wallets(key, code, entities):
             wallet['divisions'].append(division)       
         wallets.append(wallet)
     log.debug(wallets)
-    return {'wallets': wallets}
+    return {'types': entities['type'], 'wallets': wallets}
 
 
 def wallet_getter(self):
