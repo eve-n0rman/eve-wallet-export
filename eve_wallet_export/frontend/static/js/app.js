@@ -38,7 +38,6 @@ app.directive('walletSelector', ['$http', function($http){
                     var divisions = []
                     for (var index in wallet.divisions){
                         var division=wallet.divisions[index]
-                        console.log(division)
                         division.portrait = 'https://image.eveonline.com/Corporation/' + wallet.corporationID + '_64.png'
                         divisions.push(division)
                     }
