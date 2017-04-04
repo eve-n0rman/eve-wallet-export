@@ -37,19 +37,20 @@ app.directive('walletSelector', ['$http', function($http){
                     var wallet = wallets[0]
                     var divisions = []
                     for (var index in wallet.divisions){
-                        division=wallet.divisions[index]
+                        var division=wallet.divisions[index]
                         console.log(division)
                         division.portrait = 'https://image.eveonline.com/Corporation/' + wallet.corporationID + '_64.png'
                         divisions.push(division)
                     }
                     return divisions
                 }
-                else if (ctrl.types == "Character"){
+                else if (ctrl.types == "Character" || ctrl.types == "Account"){
                     var divisions = []
-                    var division
-                    for (wallet in wallets){
-                        wallet.divisions[0].portrait = 'https://image.eveonline.com/Character/' + wallet.characterID + '_64.png'
-                        divisions.push(wallet.division[0])
+                    for (var index in wallets){
+                        var wallet=wallets[index]
+                        var division=wallet.divisions[0]
+                        division.portrait = 'https://image.eveonline.com/Character/' + wallet.characterID + '_64.jpg'
+                        divisions.push(division)
                     }
                     return divisions
                 }
