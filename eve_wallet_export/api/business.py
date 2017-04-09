@@ -77,7 +77,7 @@ def wallet_entry_getter(self, wallet_type):
     wallet = wallet_to_dataframe(key, code, wtype, wallet_type, division=division, character_id=character_id)
     if output == 'csv':
         response = make_response(wallet.to_csv(encoding='utf-8'))
-        cd = 'attachment; filename=wallet-{}.csv'.format(wallet_type.lower())
+        cd = 'attachment'
         response.headers['Content-Disposition'] = cd
         response.mimetype='text/csv'
         return response
@@ -114,19 +114,23 @@ def check_key(key, code):
     keyinfo = keyinfo_root.find('.//key').attrib
     keytype = keyinfo['type']
     accessmask = int(keyinfo['accessMask'])
-    entities = {}
-    entities['type'] = keytype
-    entities['entities'] = []
+    entities = {
+        'type': keytype,
+        'entities': [],
+        'missing_masks': []
+    }
     if keytype == 'Corporation':
         for mask in required_corp_masks:
             if accessmask & accessmasks['Corporation'][mask] == 0:
                 log.warn("Missing corp permission: {}".format(mask))
-                return False
+                entities['missing_masks'].append(mask)
     if keytype == 'Character':
         for mask in required_char_masks:
             if accessmask & accessmasks['Character'][mask] == 0:
                 log.warn("Missing char permission: {}".format(mask))
-                return False
+                entities['missing_masks'].append(mask)
+    if entities['missing_masks']:
+        return entities
     for character in iter_row(keyinfo_root):
         entities['entities'].append(character)
     return entities
@@ -190,7 +194,7 @@ def fetch_wallets(key, code, entities):
             wallet['divisions'].append(division)       
         wallets.append(wallet)
     log.debug(wallets)
-    return {'wallets': wallets}
+    return {'types': entities['type'], 'wallets': wallets}
 
 
 def wallet_getter(self):
@@ -200,9 +204,9 @@ def wallet_getter(self):
     key = args.get('key')
     code = args.get('code')
     entities = check_key(key, code)
-    if entities:
+    if entities['entities']:
         return fetch_wallets(key, code, entities)
-    else:
-        raise Forbidden('Key does not have appropriate permissions')
+    elif entities['missing_masks']:
+        raise Forbidden('Key is missing the following {} permissions: {}'.format(entities['type'], ', '.join(entities['missing_masks'])))
 
 

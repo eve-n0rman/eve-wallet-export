@@ -19,6 +19,7 @@ wallet = api.model('Wallet info', {
         })
 
 wallets = api.model('Wallets accessible with this API',{
+        'types': fields.String(description='What types of wallets are returned by this key (Corporation or Character)'),
         'wallets': fields.List(fields.Nested(wallet))
         })
 

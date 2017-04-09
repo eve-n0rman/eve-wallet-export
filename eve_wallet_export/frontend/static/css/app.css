@@ -1,0 +1,9 @@
+.ng-invalid.ng-dirty {
+    border-color: red;
+};
+
+.ng-valid.ng-dirty {
+    border-color: green;
+};
+
+.nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
