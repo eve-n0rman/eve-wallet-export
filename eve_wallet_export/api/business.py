@@ -77,7 +77,7 @@ def wallet_entry_getter(self, wallet_type):
     wallet = wallet_to_dataframe(key, code, wtype, wallet_type, division=division, character_id=character_id)
     if output == 'csv':
         response = make_response(wallet.to_csv(encoding='utf-8'))
-        cd = 'attachment; filename=wallet-{}.csv'.format(wallet_type.lower())
+        cd = 'attachment'
         response.headers['Content-Disposition'] = cd
         response.mimetype='text/csv'
         return response
@@ -94,9 +94,9 @@ def get_accessmasks():
     accessmasks_root = xml_api("/api/CallList.xml.aspx")
     accessmasks = {'Corporation': {},
                    'Character': {}}
-    for accessmask in accessmasks_root.findall('.//rowset[@name="calls"]/row'):
-        accessdict = accessmask.attrib
-        accessmasks[accessdict['type']][accessdict['name']] = int(accessdict['accessMask'])
+    rowset = accessmasks_root.find('.//rowset[@name="calls"]')
+    for accessmask in iter_row(rowset):
+        accessmasks[accessmask['type']][accessmask['name']] = int(accessmask['accessMask'])
     log.debug(accessmasks)
     return accessmasks
 
@@ -114,21 +114,24 @@ def check_key(key, code):
     keyinfo = keyinfo_root.find('.//key').attrib
     keytype = keyinfo['type']
     accessmask = int(keyinfo['accessMask'])
-    entities = {}
-    entities['type'] = keytype
-    entities['entities'] = []
+    entities = {
+        'type': keytype,
+        'entities': [],
+        'missing_masks': []
+    }
     if keytype == 'Corporation':
         for mask in required_corp_masks:
             if accessmask & accessmasks['Corporation'][mask] == 0:
                 log.warn("Missing corp permission: {}".format(mask))
-                return False
+                entities['missing_masks'].append(mask)
     if keytype == 'Character':
         for mask in required_char_masks:
             if accessmask & accessmasks['Character'][mask] == 0:
                 log.warn("Missing char permission: {}".format(mask))
-                return False
-    for character_xml in keyinfo_root.findall('.//row'):
-        character = character_xml.attrib
+                entities['missing_masks'].append(mask)
+    if entities['missing_masks']:
+        return entities
+    for character in iter_row(keyinfo_root):
         entities['entities'].append(character)
     return entities
 
@@ -137,8 +140,9 @@ def fetch_wallet_balances(key, code, char_corp, character_id):
     endpoint = "/{}/AccountBalance.xml.aspx".format(char_corp)
     balance_root = xml_api(endpoint, params={'keyID': key, 'vCode': code, 'characterID': character_id})
     balances = {}
-    for division in balance_root.findall('.//rowset[@name="accounts"]/row'):
-        balances[int(division.get('accountKey'))] = float(division.get('balance'))
+    rowset = balance_root.find('.//rowset[@name="accounts"]')
+    for division in iter_row(rowset):
+        balances[int(division['accountKey'])] = float(division['balance'])
     log.debug(balances)
     return balances
 
@@ -146,12 +150,13 @@ def fetch_wallet_balances(key, code, char_corp, character_id):
 def fetch_corp_wallet_divisions(key, code):
     corp_sheet_root = xml_api('/corp/CorporationSheet.xml.aspx', params={'keyID': key, 'vCode': code})
     divisions = {}
-    for division in corp_sheet_root.findall('.//rowset[@name="walletDivisions"]/row'):
-        division_id = int(division.get('accountKey'))
+    rowset = corp_sheet_root.find('.//rowset[@name="walletDivisions"]')
+    for division in iter_row(rowset):
+        division_id = int(division['accountKey'])
         # BUGFIX: some DUST 514 nonsense that's undocumented in the API
         if division_id == 10000:
             continue
-        divisions[division_id] = division.get('description')
+        divisions[division_id] = division['description']
     log.debug(divisions)
     return divisions
 
@@ -189,7 +194,7 @@ def fetch_wallets(key, code, entities):
             wallet['divisions'].append(division)       
         wallets.append(wallet)
     log.debug(wallets)
-    return {'wallets': wallets}
+    return {'types': entities['type'], 'wallets': wallets}
 
 
 def wallet_getter(self):
@@ -199,9 +204,9 @@ def wallet_getter(self):
     key = args.get('key')
     code = args.get('code')
     entities = check_key(key, code)
-    if entities:
+    if entities['entities']:
         return fetch_wallets(key, code, entities)
-    else:
-        raise Forbidden('Key does not have appropriate permissions')
+    elif entities['missing_masks']:
+        raise Forbidden('Key is missing the following {} permissions: {}'.format(entities['type'], ', '.join(entities['missing_masks'])))
 
 

@@ -1,0 +1,34 @@
+<div class="alert alert-danger" role="alert" ng-show="walletsCtrl.errorMessage">
+  {{ walletsCtrl.errorMessage }}
+</div>
+<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+  <div ng-repeat="wallet in walletsCtrl.wallets">
+    <div class="panel panel-default">
+    <div class="panel-heading clearfix" role="tab" id="heading{{$index}}" >
+      <div class="panel-title pull-left">
+        <div class="media">
+          <div class="media-left">
+            <a href="#">
+              <img class="media-object" ng-src="{{ wallet.portrait }}" alt="">
+            </a>
+          </div>
+          <div class="media-body">
+            <h4 class="media-heading">{{ wallet.name }}</h4>
+              {{ wallet.balance | currency}}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel-body">
+        <a href="{{wallet.journal_uri}}&output=csv" download="{{wallet.name}} Journal.csv"><button class="btn btn-default btn-sm">Journal CSV</button></a>
+        <a href="{{wallet.transactions_uri}}&output=csv" download="{{wallet.name}} Transactions.csv"><button class="btn btn-default btn-sm" >Transactions CSV</button></a>
+        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{$index}}" aria-expanded="false" aria-controls="collapse{{$index}}"></a>
+    </div>
+
+    <div id="collapse{{$index}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{$index}}">
+      <div class="panel-body">
+        <wallet-entries></wallet-entries>
+      </div>
+    </div>
+  </div>
+</div>
