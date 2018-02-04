@@ -1,1 +1,1 @@
-web: gunicorn eve_wallet_export.app:app --log-file -
+web: gunicorn eve_wallet_export.app:app --log-file - --timeout 90
